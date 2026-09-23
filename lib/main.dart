@@ -12,6 +12,8 @@ const _imagePathKey = 'selected_study_image';
 const _imageTitleKey = 'selected_study_image_title';
 const _japaneseIndexKey = 'japanese_cloze_index';
 const _japaneseFeedbackKey = 'japanese_cloze_feedback';
+const _japaneseAttemptsKey = 'japanese_cloze_attempts';
+const _japaneseWrongOptionKey = 'japanese_cloze_wrong_option';
 
 const flashcards = <PhotoelectricFlashcard>[
   PhotoelectricFlashcard(
@@ -148,22 +150,40 @@ Future<void> interactiveCallback(Uri? uri) async {
       _japaneseFeedbackKey,
       defaultValue: '',
     );
+    var attempts = await HomeWidget.getWidgetData<int>(
+      _japaneseAttemptsKey,
+      defaultValue: 0,
+    );
+    var wrongOption = await HomeWidget.getWidgetData<int>(
+      _japaneseWrongOptionKey,
+      defaultValue: -1,
+    );
     index = (index ?? 0).clamp(0, japaneseClozeCards.length - 1);
+    attempts ??= 0;
+    wrongOption ??= -1;
 
     if (host == 'japanese_next') {
       if (feedback != 'correct') return;
       index = (index + 1) % japaneseClozeCards.length;
       feedback = '';
+      attempts = 0;
+      wrongOption = -1;
     } else {
       final optionIndex = int.tryParse(host!.split('_').last);
       if (optionIndex == null) return;
       feedback = optionIndex == japaneseClozeCards[index].correctIndex
           ? 'correct'
           : 'wrong';
+      if (feedback == 'wrong') {
+        attempts++;
+        wrongOption = optionIndex;
+      }
     }
 
     await HomeWidget.saveWidgetData<int>(_japaneseIndexKey, index);
     await HomeWidget.saveWidgetData<String>(_japaneseFeedbackKey, feedback);
+    await HomeWidget.saveWidgetData<int>(_japaneseAttemptsKey, attempts);
+    await HomeWidget.saveWidgetData<int>(_japaneseWrongOptionKey, wrongOption);
     await HomeWidget.updateWidget(name: 'JapaneseClozeWidgetProvider');
     return;
   }
@@ -228,6 +248,8 @@ class _FlashcardPageState extends State<FlashcardPage>
   bool _revealed = false;
   int _japaneseIndex = 0;
   String _japaneseFeedback = '';
+  int _japaneseAttempts = 0;
+  int _japaneseWrongOption = -1;
   StreamSubscription<Uri?>? _widgetClickSubscription;
 
   @override
@@ -299,19 +321,43 @@ class _FlashcardPageState extends State<FlashcardPage>
       _japaneseFeedbackKey,
       defaultValue: '',
     );
+    final attempts = await HomeWidget.getWidgetData<int>(
+      _japaneseAttemptsKey,
+      defaultValue: 0,
+    );
+    final wrongOption = await HomeWidget.getWidgetData<int>(
+      _japaneseWrongOptionKey,
+      defaultValue: -1,
+    );
     if (!mounted) return;
     setState(() {
       _japaneseIndex = (index ?? 0).clamp(0, japaneseClozeCards.length - 1);
       _japaneseFeedback = feedback ?? '';
+      _japaneseAttempts = attempts ?? 0;
+      _japaneseWrongOption = wrongOption ?? -1;
     });
   }
 
   Future<void> _answerJapanese(int optionIndex) async {
     final card = japaneseClozeCards[_japaneseIndex];
     final feedback = optionIndex == card.correctIndex ? 'correct' : 'wrong';
-    setState(() => _japaneseFeedback = feedback);
+    setState(() {
+      _japaneseFeedback = feedback;
+      if (feedback == 'wrong') {
+        _japaneseAttempts++;
+        _japaneseWrongOption = optionIndex;
+      }
+    });
     await HomeWidget.saveWidgetData<int>(_japaneseIndexKey, _japaneseIndex);
     await HomeWidget.saveWidgetData<String>(_japaneseFeedbackKey, feedback);
+    await HomeWidget.saveWidgetData<int>(
+      _japaneseAttemptsKey,
+      _japaneseAttempts,
+    );
+    await HomeWidget.saveWidgetData<int>(
+      _japaneseWrongOptionKey,
+      _japaneseWrongOption,
+    );
     await HomeWidget.updateWidget(name: 'JapaneseClozeWidgetProvider');
   }
 
@@ -320,9 +366,13 @@ class _FlashcardPageState extends State<FlashcardPage>
     setState(() {
       _japaneseIndex = (_japaneseIndex + 1) % japaneseClozeCards.length;
       _japaneseFeedback = '';
+      _japaneseAttempts = 0;
+      _japaneseWrongOption = -1;
     });
     await HomeWidget.saveWidgetData<int>(_japaneseIndexKey, _japaneseIndex);
     await HomeWidget.saveWidgetData<String>(_japaneseFeedbackKey, '');
+    await HomeWidget.saveWidgetData<int>(_japaneseAttemptsKey, 0);
+    await HomeWidget.saveWidgetData<int>(_japaneseWrongOptionKey, -1);
     await HomeWidget.updateWidget(name: 'JapaneseClozeWidgetProvider');
   }
 
@@ -418,6 +468,8 @@ class _FlashcardPageState extends State<FlashcardPage>
             _JapaneseClozeSection(
               index: _japaneseIndex,
               feedback: _japaneseFeedback,
+              attempts: _japaneseAttempts,
+              wrongOption: _japaneseWrongOption,
               onOptionSelected: _answerJapanese,
               onNext: _nextJapanese,
             ),
@@ -432,12 +484,16 @@ class _JapaneseClozeSection extends StatelessWidget {
   const _JapaneseClozeSection({
     required this.index,
     required this.feedback,
+    required this.attempts,
+    required this.wrongOption,
     required this.onOptionSelected,
     required this.onNext,
   });
 
   final int index;
   final String feedback;
+  final int attempts;
+  final int wrongOption;
   final ValueChanged<int> onOptionSelected;
   final VoidCallback onNext;
 
@@ -504,6 +560,14 @@ class _JapaneseClozeSection extends StatelessWidget {
                   ],
                 ),
         ),
+        if (attempts > 0)
+          Text(
+            'Wrong attempts: $attempts',
+            style: TextStyle(
+              color: Colors.red.shade700,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 8,
@@ -518,7 +582,9 @@ class _JapaneseClozeSection extends StatelessWidget {
                     ? null
                     : () => onOptionSelected(optionIndex),
                 style: FilledButton.styleFrom(
-                  backgroundColor: isWrong ? Colors.red.shade400 : null,
+                  backgroundColor: wrongOption == optionIndex
+                      ? Colors.red.shade400
+                      : null,
                 ),
                 child: Text(card.options[optionIndex]),
               ),

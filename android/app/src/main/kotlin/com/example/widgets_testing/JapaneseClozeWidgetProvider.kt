@@ -3,6 +3,7 @@ package com.example.widgets_testing
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.Uri
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetBackgroundIntent
@@ -18,6 +19,8 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
     ) {
         val index = widgetData.getInt(INDEX_KEY, 0).coerceIn(0, CARDS.lastIndex)
         val feedback = widgetData.getString(FEEDBACK_KEY, "") ?: ""
+        val attempts = widgetData.getInt(ATTEMPTS_KEY, 0)
+        val wrongOption = widgetData.getInt(WRONG_OPTION_KEY, -1)
         val card = CARDS[index]
         val correct = feedback == "correct"
 
@@ -31,9 +34,32 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
                     "correct" -> "✓ Correct! Next unlocked"
                     else -> "Choose the missing word"
                 })
+                setTextViewText(
+                    R.id.tv_japanese_attempts,
+                    if (attempts > 0) "Wrong attempts: $attempts" else "",
+                )
+                setTextColor(
+                    R.id.tv_japanese_feedback,
+                    when (feedback) {
+                        "wrong" -> Color.rgb(255, 180, 180)
+                        "correct" -> Color.rgb(170, 255, 190)
+                        else -> Color.rgb(216, 201, 255)
+                    },
+                )
                 setTextViewText(R.id.bt_japanese_option_0, card.options[0])
                 setTextViewText(R.id.bt_japanese_option_1, card.options[1])
                 setTextViewText(R.id.bt_japanese_option_2, card.options[2])
+                if (wrongOption in 0..2 && feedback == "wrong") {
+                    setInt(
+                        when (wrongOption) {
+                            0 -> R.id.bt_japanese_option_0
+                            1 -> R.id.bt_japanese_option_1
+                            else -> R.id.bt_japanese_option_2
+                        },
+                        "setBackgroundColor",
+                        Color.rgb(190, 55, 55),
+                    )
+                }
                 setBoolean(R.id.bt_japanese_option_0, "setEnabled", !correct)
                 setBoolean(R.id.bt_japanese_option_1, "setEnabled", !correct)
                 setBoolean(R.id.bt_japanese_option_2, "setEnabled", !correct)
@@ -69,6 +95,8 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
     private companion object {
         const val INDEX_KEY = "japanese_cloze_index"
         const val FEEDBACK_KEY = "japanese_cloze_feedback"
+        const val ATTEMPTS_KEY = "japanese_cloze_attempts"
+        const val WRONG_OPTION_KEY = "japanese_cloze_wrong_option"
         val CARDS = listOf(
             Card("わたしは ___ です。", "I am a student.", listOf("学生", "先生", "猫")),
             Card("これは ___ です。", "This is a book.", listOf("本", "水", "山")),
