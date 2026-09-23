@@ -73,8 +73,7 @@ I am a student.
 ```
 
 An incorrect option shows a red error marker and keeps the current card. A
-wrong-attempt counter is shown in the app and widget, and the last wrong option
-is highlighted red. A correct option shows a green success marker and unlocks
+wrong-attempt counter is shown in the app and widget. A correct option shows a green success marker and unlocks
 **Next card**. This rule is enforced in both the Flutter UI and the background
 callback, so the launcher widget cannot skip a question. Once correct, the
 Japanese blank is replaced with the selected word, showing the completed
@@ -148,7 +147,6 @@ selected_study_image_title title shown by the image widget
 japanese_cloze_index       current Japanese card
 japanese_cloze_feedback    empty, wrong, or correct
 japanese_cloze_attempts    number of wrong attempts on the current card
-japanese_cloze_wrong_option last wrong option index
 ```
 
 Widget button taps are converted into URI actions such as:

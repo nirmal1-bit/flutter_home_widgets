@@ -20,7 +20,6 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
         val index = widgetData.getInt(INDEX_KEY, 0).coerceIn(0, CARDS.lastIndex)
         val feedback = widgetData.getString(FEEDBACK_KEY, "") ?: ""
         val attempts = widgetData.getInt(ATTEMPTS_KEY, 0)
-        val wrongOption = widgetData.getInt(WRONG_OPTION_KEY, -1)
         val card = CARDS[index]
         val correct = feedback == "correct"
 
@@ -33,14 +32,10 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
                 )
                 setTextViewText(R.id.tv_japanese_translation, card.translation)
                 setTextViewText(R.id.tv_japanese_feedback, when (feedback) {
-                    "wrong" -> "✗ Not quite — try again"
+                    "wrong" -> "✗ Not quite — wrong answer $attempts"
                     "correct" -> "✓ Correct! Next unlocked"
                     else -> "Choose the missing word"
                 })
-                setTextViewText(
-                    R.id.tv_japanese_attempts,
-                    if (attempts > 0) "Wrong attempts: $attempts" else "",
-                )
                 setTextColor(
                     R.id.tv_japanese_feedback,
                     when (feedback) {
@@ -52,17 +47,6 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
                 setTextViewText(R.id.bt_japanese_option_0, card.options[0])
                 setTextViewText(R.id.bt_japanese_option_1, card.options[1])
                 setTextViewText(R.id.bt_japanese_option_2, card.options[2])
-                if (wrongOption in 0..2 && feedback == "wrong") {
-                    setInt(
-                        when (wrongOption) {
-                            0 -> R.id.bt_japanese_option_0
-                            1 -> R.id.bt_japanese_option_1
-                            else -> R.id.bt_japanese_option_2
-                        },
-                        "setBackgroundColor",
-                        Color.rgb(190, 55, 55),
-                    )
-                }
                 setBoolean(R.id.bt_japanese_option_0, "setEnabled", !correct)
                 setBoolean(R.id.bt_japanese_option_1, "setEnabled", !correct)
                 setBoolean(R.id.bt_japanese_option_2, "setEnabled", !correct)
@@ -93,22 +77,26 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
             Uri.parse("widgetsTesting://japanese_option_$option"),
         )
 
-    private data class Card(val sentence: String, val translation: String, val options: List<String>) {
+    private data class Card(
+        val sentence: String,
+        val translation: String,
+        val options: List<String>,
+        val correctIndex: Int,
+    ) {
         val completedSentence: String
-            get() = sentence.replace("___", options[0])
+            get() = sentence.replace("___", options[correctIndex])
     }
 
     private companion object {
         const val INDEX_KEY = "japanese_cloze_index"
         const val FEEDBACK_KEY = "japanese_cloze_feedback"
         const val ATTEMPTS_KEY = "japanese_cloze_attempts"
-        const val WRONG_OPTION_KEY = "japanese_cloze_wrong_option"
         val CARDS = listOf(
-            Card("わたしは ___ です。", "I am a student.", listOf("学生", "先生", "猫")),
-            Card("これは ___ です。", "This is a book.", listOf("本", "水", "山")),
-            Card("毎日 ___ を飲みます。", "I drink water every day.", listOf("水", "猫", "学校")),
-            Card("___ に行きます。", "I go to school.", listOf("学校", "本", "先生")),
-            Card("すしが ___ です。", "I like sushi.", listOf("好き", "行き", "飲み")),
+            Card("わたしは ___ です。", "I am a student.", listOf("先生", "学生", "猫"), 1),
+            Card("これは ___ です。", "This is a book.", listOf("水", "山", "本"), 2),
+            Card("毎日 ___ を飲みます。", "I drink water every day.", listOf("水", "猫", "学校"), 0),
+            Card("___ に行きます。", "I go to school.", listOf("本", "学校", "先生"), 1),
+            Card("すしが ___ です。", "I like sushi.", listOf("行き", "飲み", "好き"), 2),
         )
     }
 }

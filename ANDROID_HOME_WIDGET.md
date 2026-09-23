@@ -150,7 +150,6 @@ translations, and three Japanese choices. Its shared state is:
 japanese_cloze_index     current sentence, from 0 through 4
 japanese_cloze_feedback  empty, wrong, or correct
 japanese_cloze_attempts  number of wrong attempts on the current sentence
-japanese_cloze_wrong_option last wrong option index
 ```
 
 Each choice sends an action such as
@@ -160,10 +159,10 @@ with the card's correct answer, saves either `wrong` or `correct`, and refreshes
 stored feedback is `correct`, so the learner cannot skip a card.
 
 The Flutter app uses the same rules. A wrong answer changes the card tint and
-shows a red cancel marker with “Not quite — try again”, increments the visible
-wrong-attempt counter, and marks the last wrong option red. A correct answer
+shows a red cancel marker with “Not quite — wrong answer 1”, then “wrong answer 2”
+for subsequent attempts, without changing the choice-button colors. A correct answer
 shows a green check marker and unlocks **Next Japanese card**. The Android
-widget uses the same feedback text, counter, and red option marker. After a
+widget uses the same feedback text and counter. After a
 correct answer, both the Flutter app and widget replace the Japanese blank with
 the selected word, showing the completed Japanese sentence with its English
 translation. The next button remains disabled until that correct answer.
