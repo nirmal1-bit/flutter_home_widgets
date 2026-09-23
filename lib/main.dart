@@ -136,6 +136,9 @@ class JapaneseClozeCard {
   final String translation;
   final List<String> options;
   final int correctIndex;
+
+  String get completedSentence =>
+      sentence.replaceFirst('___', options[correctIndex]);
 }
 
 @pragma('vm:entry-point')
@@ -523,7 +526,7 @@ class _JapaneseClozeSection extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  card.sentence,
+                  isCorrect ? card.completedSentence : card.sentence,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),

@@ -76,7 +76,9 @@ An incorrect option shows a red error marker and keeps the current card. A
 wrong-attempt counter is shown in the app and widget, and the last wrong option
 is highlighted red. A correct option shows a green success marker and unlocks
 **Next card**. This rule is enforced in both the Flutter UI and the background
-callback, so the launcher widget cannot skip a question.
+callback, so the launcher widget cannot skip a question. Once correct, the
+Japanese blank is replaced with the selected word, showing the completed
+Japanese sentence beside its English translation.
 
 ## Important project files
 

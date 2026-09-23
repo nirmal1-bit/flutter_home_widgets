@@ -163,8 +163,10 @@ The Flutter app uses the same rules. A wrong answer changes the card tint and
 shows a red cancel marker with “Not quite — try again”, increments the visible
 wrong-attempt counter, and marks the last wrong option red. A correct answer
 shows a green check marker and unlocks **Next Japanese card**. The Android
-widget uses the same feedback text, counter, and red option marker, and disables
-its next button until the answer is correct.
+widget uses the same feedback text, counter, and red option marker. After a
+correct answer, both the Flutter app and widget replace the Japanese blank with
+the selected word, showing the completed Japanese sentence with its English
+translation. The next button remains disabled until that correct answer.
 
 ## Kotlin provider
 

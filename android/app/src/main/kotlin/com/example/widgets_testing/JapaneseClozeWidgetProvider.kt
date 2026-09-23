@@ -27,7 +27,10 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.japanese_cloze_widget_layout).apply {
                 setTextViewText(R.id.tv_japanese_progress, "Card ${index + 1} of ${CARDS.size}")
-                setTextViewText(R.id.tv_japanese_sentence, card.sentence)
+                setTextViewText(
+                    R.id.tv_japanese_sentence,
+                    if (correct) card.completedSentence else card.sentence,
+                )
                 setTextViewText(R.id.tv_japanese_translation, card.translation)
                 setTextViewText(R.id.tv_japanese_feedback, when (feedback) {
                     "wrong" -> "✗ Not quite — try again"
@@ -90,7 +93,10 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
             Uri.parse("widgetsTesting://japanese_option_$option"),
         )
 
-    private data class Card(val sentence: String, val translation: String, val options: List<String>)
+    private data class Card(val sentence: String, val translation: String, val options: List<String>) {
+        val completedSentence: String
+            get() = sentence.replace("___", options[0])
+    }
 
     private companion object {
         const val INDEX_KEY = "japanese_cloze_index"
