@@ -582,7 +582,7 @@ class _JapaneseClozeSection extends StatelessWidget {
                     ? null
                     : () => onOptionSelected(optionIndex),
                 style: FilledButton.styleFrom(
-                  backgroundColor: wrongOption == optionIndex
+                  backgroundColor: isWrong && wrongOption == optionIndex
                       ? Colors.red.shade400
                       : null,
                 ),
