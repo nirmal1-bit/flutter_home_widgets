@@ -31,6 +31,13 @@ Android home-screen widgets are rendered with `RemoteViews`, not regular
 Flutter widgets. The Kotlin providers and XML layouts therefore live under
 `android/app/src/main`, while Dart owns the shared data and background actions.
 
+The interactive widgets use Android's `partiallyUpdateAppWidget` after their
+first render. This updates only the changed text, visibility, and button state
+instead of replacing the complete widget view tree on every answer. That avoids
+the visible launcher flicker that can happen when `updateAppWidget` is used for
+every tap. The first placement still uses a full update so the widget is
+initialized reliably.
+
 ## Features
 
 ### Photoelectric-effect flashcards
