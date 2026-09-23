@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/japanese_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="12dp">
+    <TextView
+        android:id="@+id/tv_japanese_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Card 1 of 5"
+        android:textColor="#D8C9FF"
+        android:textSize="12sp" />
+    <TextView
+        android:id="@+id/tv_japanese_sentence"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:text="わたしは ___ です。"
+        android:textColor="@android:color/white"
+        android:textSize="19sp"
+        android:textStyle="bold" />
+    <TextView
+        android:id="@+id/tv_japanese_translation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="I am a student."
+        android:textColor="@android:color/white"
+        android:textSize="12sp" />
+    <TextView
+        android:id="@+id/tv_japanese_feedback"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:text="Choose the missing word"
+        android:textColor="#D8C9FF"
+        android:textSize="12sp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/bt_japanese_option_0"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="3dp"
+            android:layout_weight="1"
+            android:text="学生"
+            android:textSize="12sp" />
+        <Button
+            android:id="@+id/bt_japanese_option_1"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="3dp"
+            android:layout_weight="1"
+            android:text="先生"
+            android:textSize="12sp" />
+        <Button
+            android:id="@+id/bt_japanese_option_2"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="3dp"
+            android:layout_weight="1"
+            android:text="猫"
+            android:textSize="12sp" />
+    </LinearLayout>
+    <Button
+        android:id="@+id/bt_japanese_next"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="6dp"
+        android:enabled="false"
+        android:text="Next card"
+        android:textSize="12sp" />
+</LinearLayout>
