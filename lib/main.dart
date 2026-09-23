@@ -222,6 +222,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Photoelectric Effects Flashcards',
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.indigo)),
       home: const FlashcardPage(),
