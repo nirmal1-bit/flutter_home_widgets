@@ -17,6 +17,10 @@ class HomeScreenWidgetProvider : HomeWidgetProvider() {
         appWidgetIds: IntArray,
         widgetData: SharedPreferences,
     ) {
+        val initializationState = context.getSharedPreferences(
+            INIT_PREFS,
+            Context.MODE_PRIVATE,
+        )
         appWidgetIds.forEach { widgetId ->
             val cardIndex = widgetData.getInt(CARD_INDEX_KEY, 0).coerceIn(0, CARDS.lastIndex)
             val revealed = widgetData.getBoolean(REVEALED_KEY, false)
@@ -51,13 +55,22 @@ class HomeScreenWidgetProvider : HomeWidgetProvider() {
                 setOnClickPendingIntent(R.id.bt_next, nextIntent)
             }
 
-            appWidgetManager.updateAppWidget(widgetId, views)
+            val initialized = initializationState.getBoolean("widget_$widgetId", false)
+            if (initialized) {
+                // Preserve the existing RemoteViews tree to avoid launcher
+                // blinking after every flashcard interaction.
+                appWidgetManager.partiallyUpdateAppWidget(widgetId, views)
+            } else {
+                appWidgetManager.updateAppWidget(widgetId, views)
+                initializationState.edit().putBoolean("widget_$widgetId", true).apply()
+            }
         }
     }
 
     private companion object {
         const val CARD_INDEX_KEY = "flashcard_index"
         const val REVEALED_KEY = "flashcard_revealed"
+        const val INIT_PREFS = "widget_initialization"
 
         val CARDS = listOf(
             "What is Einstein's photoelectric equation?" to

@@ -17,6 +17,10 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
         appWidgetIds: IntArray,
         widgetData: SharedPreferences,
     ) {
+        val initializationState = context.getSharedPreferences(
+            INIT_PREFS,
+            Context.MODE_PRIVATE,
+        )
         val index = widgetData.getInt(INDEX_KEY, 0).coerceIn(0, CARDS.lastIndex)
         val feedback = widgetData.getString(FEEDBACK_KEY, "") ?: ""
         val attempts = widgetData.getInt(ATTEMPTS_KEY, 0)
@@ -67,7 +71,15 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
                     ),
                 )
             }
-            appWidgetManager.updateAppWidget(widgetId, views)
+            val initialized = initializationState.getBoolean("widget_$widgetId", false)
+            if (initialized) {
+                // Only apply changed properties instead of replacing the whole
+                // RemoteViews hierarchy after every answer tap.
+                appWidgetManager.partiallyUpdateAppWidget(widgetId, views)
+            } else {
+                appWidgetManager.updateAppWidget(widgetId, views)
+                initializationState.edit().putBoolean("widget_$widgetId", true).apply()
+            }
         }
     }
 
@@ -91,6 +103,7 @@ class JapaneseClozeWidgetProvider : HomeWidgetProvider() {
         const val INDEX_KEY = "japanese_cloze_index"
         const val FEEDBACK_KEY = "japanese_cloze_feedback"
         const val ATTEMPTS_KEY = "japanese_cloze_attempts"
+        const val INIT_PREFS = "widget_initialization"
         val CARDS = listOf(
             Card("わたしは ___ です。", "I am a student.", listOf("先生", "学生", "猫"), 1),
             Card("これは ___ です。", "This is a book.", listOf("水", "山", "本"), 2),

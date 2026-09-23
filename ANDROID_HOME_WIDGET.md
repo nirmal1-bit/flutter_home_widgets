@@ -29,6 +29,12 @@ Flutter cannot render an ordinary Flutter widget directly in the Android
 launcher. Android renders this widget through `RemoteViews`, so the feature is
 split between Dart state and native Kotlin/XML UI:
 
+The interactive providers use Android's `partiallyUpdateAppWidget` when their
+state changes. Replacing the entire `RemoteViews` tree with
+`updateAppWidget` after every answer can make some launchers visibly blink;
+partial updates preserve the existing widget hierarchy and change only the
+properties needed for the new state.
+
 ```text
 Flutter app ──saveWidgetData──> home_widget storage <──HomeWidgetProvider── widget
        │                              ▲                         │
